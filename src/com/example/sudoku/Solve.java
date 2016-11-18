@@ -13,6 +13,7 @@ public class Solve {
         Integer order = Integer.parseInt(args[0]);
         Board board = new Board();
         board.makeBoard(order);
+        board.loadBoard();
         board.displayBoard();
         board.solveBoard();
     }

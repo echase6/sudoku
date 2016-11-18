@@ -42,6 +42,13 @@ public class Board {
         }
     }
 
+    public void loadBoard()
+    {
+        String directory = "puzzles/order_" + order;
+        String filename = "sudoku_1.txt";
+        System.out.println(directory + "/" + filename);
+    }
+
     /**
      * solveBoard is the entry point for the solver.
      */
