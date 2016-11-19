@@ -1,5 +1,10 @@
 package com.example.sudoku;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
 /**
  * Created by Eric on 11/17/2016.
  *
@@ -34,19 +39,95 @@ public class Board {
      * displayBoard does the obvious.
      */
     public void displayBoard() {
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                System.out.print(" " + getChar(cells[i][j]) + " ");
+        StringBuilder border = new StringBuilder("+");
+        for (int i = 0; i < order; i++) {
+            for (int j = 0; j < order; j++) {
+                border.append("---");
             }
-            System.out.println("");
+            border.append('+');
+        }
+        System.out.println(border);
+        for (int i = 0; i < order; i++) {
+            for (int j = 0; j < order; j++) {
+                StringBuilder line = new StringBuilder("|");
+                for (int k = 0; k < order; k++) {
+                    for (int l = 0; l < order; l++) {
+                        line.append(' ').append(getChar(cells[i * order + j][k * order + l])).append(' ');
+                    }
+                    line.append('|');
+                }
+                System.out.println(line);
+            }
+            System.out.println(border);
         }
     }
 
-    public void loadBoard()
-    {
+    public void display3dBoard() {
+        StringBuilder border = new StringBuilder("");
+        for (int i = 0; i < size; i++) {
+            border.append("+-");
+            for (int j = 0; j < size; j++) {
+                border.append("--");
+            }
+            border.append("+ ");
+        }
+        System.out.println(border);
+        for (int i = 0; i < size; i++) {
+            StringBuilder line = new StringBuilder("");
+            for (int j = 0; j < size; j++) {
+                line.append("| ");
+                for (int k = 0; k < size; k++) {
+                    if (cells[i][j][k]) {
+                        line.append(k);
+                    } else {
+                        line.append('.');
+                    }
+                    line.append(' ');
+                }
+                line.append("| ");
+            }
+            System.out.println(line);
+        }
+        System.out.println(border);
+    }
+
+    public void loadBoard() {
         String directory = "puzzles/order_" + order;
         String filename = "sudoku_1.txt";
+        String fullFileName = directory + '/' + filename;
         System.out.println(directory + "/" + filename);
+
+        FileReader fReader = null;
+        try {
+            fReader = new FileReader(fullFileName);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return;
+        }
+        BufferedReader bReader = new BufferedReader(fReader);
+
+        Integer i = 0;
+        try {
+            String line = bReader.readLine();
+            while (line != null)
+            {
+                for (int j = 0; j < line.length(); j++) {
+                    if (line.charAt(j) != '.')
+                    {
+                        int gotChar = Integer.parseInt(line.substring(j, j));
+                        for (int k = 0; k < size; k++) {
+                            cells[i][j][k] = false;
+                        }
+                        cells[i][j][gotChar] = true;
+                    }
+                }
+                i++;
+                line = bReader.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**

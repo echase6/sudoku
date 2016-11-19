@@ -14,6 +14,7 @@ public class Solve {
         Board board = new Board();
         board.makeBoard(order);
         board.loadBoard();
+        board.display3dBoard();
         board.displayBoard();
         board.solveBoard();
     }
