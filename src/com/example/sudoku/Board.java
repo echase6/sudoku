@@ -4,23 +4,34 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Created by Eric on 11/17/2016.
- *
+ * <p>
  * Board related functions.
  */
 public class Board {
-    public Integer order;
-    public Integer size;
-    public Boolean[][][] cells;
+        private Integer order;
+        private Integer size;
+        private Boolean[][][] cells;
+        private HashMap charMap;
 
     /**
      * makeBoard populates a board with dummy information
      *
-     * @param order is 2, 3 or 4
      */
-    public void makeBoard(Integer order) {
+    public void init() {
+        final String order2map = "0123";
+        final String order3map = "123456789";
+        final String order4map = "0123456789ABCDEF";
+        HashMap<Integer, String> charMap = new HashMap<>();
+        charMap.put(2, order2map);
+        charMap.put(3, order3map);
+        charMap.put(4, order4map);
+    }
+
+    public void makeBoard(Integer order, Boolean addDummyData) {
         this.order = order;
         this.size = order * order;
         this.cells = new Boolean[size][size][size];
@@ -28,7 +39,11 @@ public class Board {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 for (int k = 0; k < size; k++) {
-                    cells[i][j][k] = (i == j && j == k);
+                    if (addDummyData) {
+                        cells[i][j][k] = (i == j && j == k);
+                    } else {
+                        cells[i][j][k] = true;
+                    }
                 }
             }
         }
@@ -109,18 +124,18 @@ public class Board {
         Integer i = 0;
         try {
             String line = bReader.readLine();
-            while (line != null)
-            {
+            while (line != null) {
                 for (int j = 0; j < line.length(); j++) {
-                    if (line.charAt(j) != '.')
-                    {
-                        int gotChar = Integer.parseInt(line.substring(j, j));
+                    if (line.charAt(j) != '.') {
+                        int gotChar = Integer.parseInt(line.substring(j, j + 1));
                         for (int k = 0; k < size; k++) {
                             cells[i][j][k] = false;
                         }
-                        cells[i][j][gotChar] = true;
+                        cells[i][j][gotChar - 1] = true; // TODO: make this a character look-up
+//                        System.out.println("i: " + i + " j: " + j + " gotChar = " + gotChar);
                     }
                 }
+
                 i++;
                 line = bReader.readLine();
             }
@@ -153,6 +168,7 @@ public class Board {
                 if (value != null) {
                     value = '.';
                 } else {
+//                    value = charMap.;
                     value = Integer.toString(i + 1).charAt(0);
                 }
             }
@@ -162,5 +178,50 @@ public class Board {
         } else {
             return value;
         }
+    }
+
+    /**
+     * Return the number of filled (true) cells in a shaft.
+     *
+     * @param shaft is a 1-dimensional array
+     * @return character
+     */
+    private Integer countShaftChoices(Boolean[] shaft) {
+        Integer count = 0;
+        for (int i = 0; i < shaft.length; i++) {
+            if (shaft[i]) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Return the number of cells that are filled to particular quantity.
+     *
+     * @param cells
+     * @param qty   the quantity to test to.
+     * @return
+     */
+    private Integer countFilledCellsToQty(Boolean cells[][][], Integer qty) {
+        Integer count = 0;
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (countShaftChoices(cells[i][j]) == qty) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Return the number of cells that have only one cell filled.
+     *
+     * @param cells
+     * @return
+     */
+    private Integer countChoicesLeft(Boolean cells[][][]) {
+        return countFilledCellsToQty(cells, 1);
     }
 }
