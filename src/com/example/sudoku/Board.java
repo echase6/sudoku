@@ -12,27 +12,27 @@ import java.util.HashMap;
  * Board related functions.
  */
 public class Board {
-        private Integer order;
-        private Integer size;
+        private static Integer order;
+        private static Integer size;
         private Boolean[][][] cells;
-        private HashMap charMap;
+        private HashMap<Integer, String> charMap = new HashMap<>();
+        private final String order2map;
+        private final String order3map;
+        private final String order4map;
 
-    /**
-     * makeBoard populates a board with dummy information
-     *
-     */
-    public void init() {
-        final String order2map = "0123";
-        final String order3map = "123456789";
-        final String order4map = "0123456789ABCDEF";
-        HashMap<Integer, String> charMap = new HashMap<>();
+
+    public Board(Integer order) {
+        this.order = order;
+        order2map = "1234";
+        order3map = "123456789";
+        order4map = "0123456789ABCDEF";
         charMap.put(2, order2map);
         charMap.put(3, order3map);
         charMap.put(4, order4map);
     }
 
-    public void makeBoard(Integer order, Boolean addDummyData) {
-        this.order = order;
+
+    public void makeBoard(Boolean addDummyData) {
         this.size = order * order;
         this.cells = new Boolean[size][size][size];
 
@@ -47,7 +47,6 @@ public class Board {
                 }
             }
         }
-        System.out.println("order = " + order);
     }
 
     /**
@@ -92,8 +91,8 @@ public class Board {
             for (int j = 0; j < size; j++) {
                 line.append("| ");
                 for (int k = 0; k < size; k++) {
-                    if (cells[i][j][k]) {
-                        line.append(k);
+                    if (cells[i][k][j]) {  // Don't let this freak you out...
+                        line.append(charMap.get(order).charAt(j));
                     } else {
                         line.append('.');
                     }
@@ -122,20 +121,20 @@ public class Board {
         BufferedReader bReader = new BufferedReader(fReader);
 
         Integer i = 0;
+        Integer index;
+        String letterSet = charMap.get(order);
         try {
             String line = bReader.readLine();
             while (line != null) {
                 for (int j = 0; j < line.length(); j++) {
                     if (line.charAt(j) != '.') {
-                        int gotChar = Integer.parseInt(line.substring(j, j + 1));
+                        index = letterSet.indexOf(line.substring(j, j+1));
                         for (int k = 0; k < size; k++) {
                             cells[i][j][k] = false;
                         }
-                        cells[i][j][gotChar - 1] = true; // TODO: make this a character look-up
-//                        System.out.println("i: " + i + " j: " + j + " gotChar = " + gotChar);
+                        cells[i][j][index] = true;
                     }
                 }
-
                 i++;
                 line = bReader.readLine();
             }
@@ -199,11 +198,10 @@ public class Board {
     /**
      * Return the number of cells that are filled to particular quantity.
      *
-     * @param cells
      * @param qty   the quantity to test to.
      * @return
      */
-    private Integer countFilledCellsToQty(Boolean cells[][][], Integer qty) {
+    private Integer countFilledCellsToQty(Board board, Integer qty) {
         Integer count = 0;
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
@@ -218,10 +216,46 @@ public class Board {
     /**
      * Return the number of cells that have only one cell filled.
      *
-     * @param cells
      * @return
      */
-    private Integer countChoicesLeft(Boolean cells[][][]) {
-        return countFilledCellsToQty(cells, 1);
+    public Integer countFilledCells(Board board) {
+        return countFilledCellsToQty(board, 1);
+    }
+
+    /**
+     * Returns the number of cells with a true in them.
+     * @param board
+     * @return
+     */
+    public Integer sumFilledCells(Board board)
+    {
+        Integer count = 0;
+        Boolean[][][] cells = board.getCells();
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                for (int k = 0; k < size; k++) {
+                    if (cells[i][j][k])
+                    {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    public static Integer getSize()
+    {
+        return size;
+    }
+
+    public static Integer getOrder()
+    {
+        return order;
+    }
+
+    public Boolean[][][] getCells()
+    {
+        return cells;
     }
 }
