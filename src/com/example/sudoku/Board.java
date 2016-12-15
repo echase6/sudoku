@@ -14,7 +14,7 @@ import java.util.HashMap;
 public class Board {
         private static Integer order;
         private static Integer size;
-        private Boolean[][][] cells;
+        private Cell[][][] cells;
         private HashMap<Integer, String> charMap = new HashMap<>();
         private final String order2map;
         private final String order3map;
@@ -34,15 +34,15 @@ public class Board {
 
     public void makeBoard(Boolean addDummyData) {
         this.size = order * order;
-        this.cells = new Boolean[size][size][size];
+        this.cells = new Cell[size][size][size];
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 for (int k = 0; k < size; k++) {
                     if (addDummyData) {
-                        cells[i][j][k] = (i == j && j == k);
+                        cells[i][j][k].setFilled(i == j && j == k);
                     } else {
-                        cells[i][j][k] = true;
+                        cells[i][j][k].setFilled(true);
                     }
                 }
             }
@@ -91,7 +91,7 @@ public class Board {
             for (int j = 0; j < size; j++) {
                 line.append("| ");
                 for (int k = 0; k < size; k++) {
-                    if (cells[i][k][j]) {  // Don't let this freak you out...
+                    if (cells[i][k][j].getFilled()) {  // Don't let this freak you out...
                         line.append(charMap.get(order).charAt(j));
                     } else {
                         line.append('.');
@@ -130,9 +130,9 @@ public class Board {
                     if (line.charAt(j) != '.') {
                         index = letterSet.indexOf(line.substring(j, j+1));
                         for (int k = 0; k < size; k++) {
-                            cells[i][j][k] = false;
+                            cells[i][j][k].setFilled(false);
                         }
-                        cells[i][j][index] = true;
+                        cells[i][j][index].setFilled(true);
                     }
                 }
                 i++;
@@ -160,10 +160,10 @@ public class Board {
      * @param shaft is a 1-dimensional array
      * @return character
      */
-    private Character getChar(Boolean[] shaft) {
+    private Character getChar(Cell[] shaft) {
         Character value = null;
         for (int i = 0; i < shaft.length; i++) {
-            if (shaft[i]) {
+            if (shaft[i].getFilled()) {
                 if (value != null) {
                     value = '.';
                 } else {
@@ -185,10 +185,10 @@ public class Board {
      * @param shaft is a 1-dimensional array
      * @return character
      */
-    private Integer countShaftChoices(Boolean[] shaft) {
+    private Integer countShaftChoices(Cell[] shaft) {
         Integer count = 0;
         for (int i = 0; i < shaft.length; i++) {
-            if (shaft[i]) {
+            if (shaft[i].getFilled()) {
                 count++;
             }
         }
@@ -230,11 +230,11 @@ public class Board {
     public Integer sumFilledCells(Board board)
     {
         Integer count = 0;
-        Boolean[][][] cells = board.getCells();
+        Cell[][][] cells = board.getCells();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 for (int k = 0; k < size; k++) {
-                    if (cells[i][j][k])
+                    if (cells[i][j][k].getFilled())
                     {
                         count++;
                     }
@@ -254,7 +254,7 @@ public class Board {
         return order;
     }
 
-    public Boolean[][][] getCells()
+    public Cell[][][] getCells()
     {
         return cells;
     }
