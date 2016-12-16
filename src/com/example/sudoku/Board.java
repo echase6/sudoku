@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by Eric on 11/17/2016.
@@ -13,8 +15,8 @@ import java.util.HashMap;
  */
 public class Board {
         private static Integer order;
-        private static Integer size;
-        private Cell[][][] cells;
+        public static Integer size;
+        private List<List<List<Cell>>> cells;
         private HashMap<Integer, String> charMap = new HashMap<>();
         private final String order2map;
         private final String order3map;
@@ -34,18 +36,27 @@ public class Board {
 
     public void makeBoard(Boolean addDummyData) {
         this.size = order * order;
-        this.cells = new Cell[size][size][size];
+
+//        this.cells = new Boolean[size][size][size];
+        this.cells = new ArrayList<>(size);
 
         for (int i = 0; i < size; i++) {
+            ArrayList<List<Cell>> cols = new ArrayList<>(size);
             for (int j = 0; j < size; j++) {
+                int box =  j / order + (i / order) * order;
+                ArrayList<Cell> nums = new ArrayList<>(size);
                 for (int k = 0; k < size; k++) {
+                    Cell cell;
                     if (addDummyData) {
-                        cells[i][j][k].setFilled(i == j && j == k);
+                        cell = new Cell(i, j, k, box, true);
                     } else {
-                        cells[i][j][k].setFilled(true);
+                        cell = new Cell(i, j, k, box, true);
                     }
+                    nums.add(cell);
                 }
+                cols.add(nums);
             }
+            cells.add(cols);
         }
     }
 
@@ -66,7 +77,7 @@ public class Board {
                 StringBuilder line = new StringBuilder("|");
                 for (int k = 0; k < order; k++) {
                     for (int l = 0; l < order; l++) {
-                        line.append(' ').append(getChar(cells[i * order + j][k * order + l])).append(' ');
+                        line.append(' ').append(getChar(cells.get(i * order + j).get(k * order + l))).append(' ');
                     }
                     line.append('|');
                 }
@@ -91,7 +102,7 @@ public class Board {
             for (int j = 0; j < size; j++) {
                 line.append("| ");
                 for (int k = 0; k < size; k++) {
-                    if (cells[i][k][j].getFilled()) {  // Don't let this freak you out...
+                    if (cells.get(i).get(j).get(k).getFilled()) {  // Don't let this freak you out...
                         line.append(charMap.get(order).charAt(j));
                     } else {
                         line.append('.');
@@ -130,9 +141,9 @@ public class Board {
                     if (line.charAt(j) != '.') {
                         index = letterSet.indexOf(line.substring(j, j+1));
                         for (int k = 0; k < size; k++) {
-                            cells[i][j][k].setFilled(false);
+                            cells.get(i).get(j).get(k).setFilled(false);
                         }
-                        cells[i][j][index].setFilled(true);
+                        cells.get(i).get(j).get(index).setFilled(true);
                     }
                 }
                 i++;
@@ -160,10 +171,10 @@ public class Board {
      * @param shaft is a 1-dimensional array
      * @return character
      */
-    private Character getChar(Cell[] shaft) {
+    private Character getChar(List<Cell> shaft) {
         Character value = null;
-        for (int i = 0; i < shaft.length; i++) {
-            if (shaft[i].getFilled()) {
+        for (int i = 0; i < shaft.size(); i++) {
+            if (shaft.get(i).getFilled()) {
                 if (value != null) {
                     value = '.';
                 } else {
@@ -185,10 +196,10 @@ public class Board {
      * @param shaft is a 1-dimensional array
      * @return character
      */
-    private Integer countShaftChoices(Cell[] shaft) {
+    private Integer countShaftChoices(List<Cell> shaft) {
         Integer count = 0;
-        for (int i = 0; i < shaft.length; i++) {
-            if (shaft[i].getFilled()) {
+        for (int i = 0; i < shaft.size(); i++) {
+            if (shaft.get(i).getFilled()) {
                 count++;
             }
         }
@@ -205,7 +216,7 @@ public class Board {
         Integer count = 0;
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if (countShaftChoices(cells[i][j]) == qty) {
+                if (countShaftChoices(cells.get(i).get(j)) == qty) {
                     count++;
                 }
             }
@@ -224,17 +235,16 @@ public class Board {
 
     /**
      * Returns the number of cells with a true in them.
-     * @param board
      * @return
      */
     public Integer sumFilledCells(Board board)
     {
         Integer count = 0;
-        Cell[][][] cells = board.getCells();
+        List<List<List<Cell>>> cells = board.getCells();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 for (int k = 0; k < size; k++) {
-                    if (cells[i][j][k].getFilled())
+                    if (cells.get(i).get(j).get(k).getFilled())
                     {
                         count++;
                     }
@@ -254,8 +264,13 @@ public class Board {
         return order;
     }
 
-    public Cell[][][] getCells()
+    public List<List<List<Cell>>> getCells()
     {
         return cells;
     }
+
+//    public Boolean[][][] getCells()
+//    {
+//        return cells;
+//    }
 }

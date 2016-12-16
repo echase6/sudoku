@@ -3,6 +3,8 @@ package com.example.sudoku;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.sudoku.Board.size;
+
 /**
  * Created by Eric on 12/12/2016.
  * <p>
@@ -17,7 +19,7 @@ public class Solver {
     }
 
     public void init() {
-        List<Slice> slices = new ArrayList<>();
+        List<Slice> slices = new ArrayList<>(size);
     }
 
     public void run() {
@@ -44,17 +46,17 @@ public class Solver {
     private Board aggregateResults(List<Slice> sliceResults) {
         int order = Board.getOrder();
         Board results = new Board(order);
-        Boolean[][][] resultCells = results.getCells();
+        List<List<List<Cell>>> resultCells = results.getCells();
         for (Slice sliceResult: sliceResults)
         {
-            Boolean[][] sliceCells = sliceResult.getCells();
+            List<List<Cell>> sliceCells = sliceResult.getCells();
             for (List<Integer> index: sliceResult.getIndices())
             {
                 int i = index.get(0);
                 int j = index.get(1);
                 int k = index.get(2);
-                if (!sliceCells[i][j]) {
-                    resultCells[i][j][k] = false;
+                if (!sliceCells.get(i).get(j).getFilled()) {
+                    resultCells.get(i).get(j).get(k).setFilled(false);
                 }
             }
         }
@@ -63,14 +65,14 @@ public class Solver {
 
     private void depopulateBoard(Board board, Board results) {
         int size = board.getSize();
-        Boolean[][][] boardCells = board.getCells();
-        Boolean[][][] resultsCells = results.getCells();
+        List<List<List<Cell>>> boardCells = board.getCells();
+        List<List<List<Cell>>> resultsCells = results.getCells();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 for (int k = 0; k < size; k++) {
-                    if (!resultsCells[i][j][k])  // TODO:  Make sure the sense of this is correct.
+                    if (!resultsCells.get(i).get(j).get(k).getFilled())  // TODO:  Make sure the sense of this is correct.
                     {
-                        boardCells[i][j][k] = false;
+                        boardCells.get(i).get(j).get(k).setFilled(false);
                     }
                 }
             }

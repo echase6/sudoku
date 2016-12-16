@@ -26,8 +26,30 @@ public class Cell {
         this.filled = filled;
     }
 
+    public void setLocation(int row, int col, int box, int num)
+    {
+        this.row = row;
+        this.col = col;
+        this.box = box;
+        this.num = num;
+    }
+
     public boolean getFilled()
     {
         return filled;
+    }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder("Cell{");
+        sb.append(" row: ").append(row);
+        sb.append(" col: ").append(col);
+        sb.append(" box: ").append(box);
+        sb.append(" num: ").append(num);
+        sb.append(" filled ").append(filled);
+        sb.append("}");
+
+        return sb.toString();
     }
 }

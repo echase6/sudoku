@@ -15,15 +15,15 @@ import java.util.List;
  */
 public class Slice {
 
-    private Boolean[][] cells;
+    private List<List<Cell>> cells;
     private Integer sliceNum;
 
-    public Slice(Boolean[][] cells, int sliceNum) {
+    public Slice(List<List<Cell>> cells, int sliceNum) {
         this.cells = cells;
         this.sliceNum = sliceNum;
     }
 
-    public Boolean[][] getCells()
+    public List<List<Cell>> getCells()
     {
         return cells;
     }
