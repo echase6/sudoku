@@ -3,7 +3,6 @@ package com.example.sudoku;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.sudoku.Board.size;
 
 /**
  * Created by Eric on 12/12/2016.
@@ -19,15 +18,14 @@ public class Solver {
     }
 
     public void init() {
-        List<Slice> slices = new ArrayList<>(size);
-    }
+        slices = new ArrayList<>(board.getSize());}
 
     public void run() {
         Board results;
         Boolean done = false;
         Boolean stalled = false;
         while (!done && !stalled) {
-            List<Slice> sliceResults = null;
+            List<Slice> sliceResults = new ArrayList<>(board.getSize());
             for (Slice slice : slices)    // This is where multi-treading may be used.
             {
                 sliceResults.add(getSliceResults(slice));
@@ -44,8 +42,9 @@ public class Solver {
     }
 
     private Board aggregateResults(List<Slice> sliceResults) {
-        int order = Board.getOrder();
+        int order = board.getOrder();
         Board results = new Board(order);
+        results.makeBoard(false);
         List<List<List<Cell>>> resultCells = results.getCells();
         for (Slice sliceResult: sliceResults)
         {
@@ -55,8 +54,8 @@ public class Solver {
                 int i = index.get(0);
                 int j = index.get(1);
                 int k = index.get(2);
-                if (!sliceCells.get(i).get(j).getFilled()) {
-                    resultCells.get(i).get(j).get(k).setFilled(false);
+                if (!sliceCells.get(i).get(j).isFilled()) {
+                    resultCells.get(i).get(j).get(k).fill();
                 }
             }
         }
@@ -67,12 +66,14 @@ public class Solver {
         int size = board.getSize();
         List<List<List<Cell>>> boardCells = board.getCells();
         List<List<List<Cell>>> resultsCells = results.getCells();
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                for (int k = 0; k < size; k++) {
-                    if (!resultsCells.get(i).get(j).get(k).getFilled())  // TODO:  Make sure the sense of this is correct.
-                    {
-                        boardCells.get(i).get(j).get(k).setFilled(false);
+        if (resultsCells != null && !resultsCells.isEmpty()) {
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    for (int k = 0; k < size; k++) {
+                        if (!resultsCells.get(i).get(j).get(k).isFilled())  // TODO:  Make sure the sense of this is correct.
+                        {
+                            boardCells.get(i).get(j).get(k).unfill();
+                        }
                     }
                 }
             }
@@ -81,12 +82,16 @@ public class Solver {
 
     private boolean isDone(Board board) {
         int targetQuantity = board.getSize();
-        int filledQuantity = board.countFilledCells(board);
+        int filledQuantity = board.countFilledCells();
         return (targetQuantity == filledQuantity);
     }
 
     private boolean isStalled(Board results) {
-        int resultsQuantity = results.countFilledCells(results);
+        if (results == null)
+        {
+            return true;
+        }
+        int resultsQuantity = results.countFilledCells();
         return (resultsQuantity == 0);
     }
 

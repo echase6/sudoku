@@ -14,8 +14,8 @@ import java.util.List;
  * Board related functions.
  */
 public class Board {
-        private static Integer order;
-        public static Integer size;
+        private Integer order;
+        private Integer size;
         private List<List<List<Cell>>> cells;
         private HashMap<Integer, String> charMap = new HashMap<>();
         private final String order2map;
@@ -31,15 +31,12 @@ public class Board {
         charMap.put(2, order2map);
         charMap.put(3, order3map);
         charMap.put(4, order4map);
+        this.size = order * order;
+        this.cells = new ArrayList<>(size);
     }
 
 
     public void makeBoard(Boolean addDummyData) {
-        this.size = order * order;
-
-//        this.cells = new Boolean[size][size][size];
-        this.cells = new ArrayList<>(size);
-
         for (int i = 0; i < size; i++) {
             ArrayList<List<Cell>> cols = new ArrayList<>(size);
             for (int j = 0; j < size; j++) {
@@ -52,6 +49,23 @@ public class Board {
                     } else {
                         cell = new Cell(i, j, k, box, true);
                     }
+                    nums.add(cell);
+                }
+                cols.add(nums);
+            }
+            cells.add(cols);
+        }
+    }
+
+
+    public void makeEmptyBoard() {
+        for (int i = 0; i < size; i++) {
+            ArrayList<List<Cell>> cols = new ArrayList<>(size);
+            for (int j = 0; j < size; j++) {
+                int box =  j / order + (i / order) * order;
+                ArrayList<Cell> nums = new ArrayList<>(size);
+                for (int k = 0; k < size; k++) {
+                    Cell cell = new Cell(i, j, k, box, false);
                     nums.add(cell);
                 }
                 cols.add(nums);
@@ -97,12 +111,15 @@ public class Board {
             border.append("+ ");
         }
         System.out.println(border);
+        // i is the overall row
         for (int i = 0; i < size; i++) {
             StringBuilder line = new StringBuilder("");
+            // j is the 'number'
             for (int j = 0; j < size; j++) {
                 line.append("| ");
+                // k is the column, within each square
                 for (int k = 0; k < size; k++) {
-                    if (cells.get(i).get(j).get(k).getFilled()) {  // Don't let this freak you out...
+                    if (cells.get(i).get(k).get(j).isFilled()) {  // Don't let this freak you out...
                         line.append(charMap.get(order).charAt(j));
                     } else {
                         line.append('.');
@@ -122,7 +139,7 @@ public class Board {
         String fullFileName = directory + '/' + filename;
         System.out.println(directory + "/" + filename);
 
-        FileReader fReader = null;
+        FileReader fReader;
         try {
             fReader = new FileReader(fullFileName);
         } catch (FileNotFoundException e) {
@@ -131,19 +148,19 @@ public class Board {
         }
         BufferedReader bReader = new BufferedReader(fReader);
 
-        Integer i = 0;
-        Integer index;
         String letterSet = charMap.get(order);
         try {
             String line = bReader.readLine();
+            Integer i = 0;
             while (line != null) {
                 for (int j = 0; j < line.length(); j++) {
                     if (line.charAt(j) != '.') {
-                        index = letterSet.indexOf(line.substring(j, j+1));
+                        Integer index = letterSet.indexOf(line.substring(j, j+1));
                         for (int k = 0; k < size; k++) {
-                            cells.get(i).get(j).get(k).setFilled(false);
+                            if (k != index) {
+                                cells.get(i).get(j).get(k).unfill();
+                            }
                         }
-                        cells.get(i).get(j).get(index).setFilled(true);
                     }
                 }
                 i++;
@@ -172,22 +189,17 @@ public class Board {
      * @return character
      */
     private Character getChar(List<Cell> shaft) {
-        Character value = null;
+        Character value = 'X';
         for (int i = 0; i < shaft.size(); i++) {
-            if (shaft.get(i).getFilled()) {
-                if (value != null) {
-                    value = '.';
+            if (shaft.get(i).isFilled()) {
+                if (value != 'X') {
+                    return '.';
                 } else {
-//                    value = charMap.;
                     value = Integer.toString(i + 1).charAt(0);
                 }
             }
         }
-        if (value == null) {
-            return 'X';
-        } else {
-            return value;
-        }
+        return value;
     }
 
     /**
@@ -199,7 +211,7 @@ public class Board {
     private Integer countShaftChoices(List<Cell> shaft) {
         Integer count = 0;
         for (int i = 0; i < shaft.size(); i++) {
-            if (shaft.get(i).getFilled()) {
+            if (shaft.get(i).isFilled()) {
                 count++;
             }
         }
@@ -212,11 +224,11 @@ public class Board {
      * @param qty   the quantity to test to.
      * @return
      */
-    private Integer countFilledCellsToQty(Board board, Integer qty) {
+    private Integer countFilledCellsToQty(Integer qty) {
         Integer count = 0;
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if (countShaftChoices(cells.get(i).get(j)) == qty) {
+                if (countShaftChoices(cells.get(i).get(j)).equals(qty)) {
                     count++;
                 }
             }
@@ -229,22 +241,21 @@ public class Board {
      *
      * @return
      */
-    public Integer countFilledCells(Board board) {
-        return countFilledCellsToQty(board, 1);
+    public Integer countFilledCells() {
+        return countFilledCellsToQty(1);
     }
 
     /**
      * Returns the number of cells with a true in them.
      * @return
      */
-    public Integer sumFilledCells(Board board)
+    public Integer sumFilledCells()
     {
         Integer count = 0;
-        List<List<List<Cell>>> cells = board.getCells();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 for (int k = 0; k < size; k++) {
-                    if (cells.get(i).get(j).get(k).getFilled())
+                    if (cells.get(i).get(j).get(k).isFilled())
                     {
                         count++;
                     }
@@ -254,12 +265,12 @@ public class Board {
         return count;
     }
 
-    public static Integer getSize()
+    public Integer getSize()
     {
         return size;
     }
 
-    public static Integer getOrder()
+    public Integer getOrder()
     {
         return order;
     }

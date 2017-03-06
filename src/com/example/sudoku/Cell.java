@@ -26,6 +26,16 @@ public class Cell {
         this.filled = filled;
     }
 
+    public void fill()
+    {
+        this.filled = true;
+    }
+
+    public void unfill()
+    {
+        this.filled = false;
+    }
+
     public void setLocation(int row, int col, int box, int num)
     {
         this.row = row;
@@ -34,7 +44,7 @@ public class Cell {
         this.num = num;
     }
 
-    public boolean getFilled()
+    public boolean isFilled()
     {
         return filled;
     }

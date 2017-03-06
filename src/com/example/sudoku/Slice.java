@@ -12,6 +12,16 @@ import java.util.List;
  * There should be 8 total:
  *  3 per face, x 2 for row-first or column-first (6)
  *  1 more for each box, x 2 for box-iterator-first or depth-iterator-first (2)
+ *
+ *  Mapping:
+ *      1  R C N
+ *      2  R N C
+ *      3  C R N
+ *      4  C N R
+ *      5  N R C
+ *      6  N C R
+ *      7  B N
+ *      8  N B
  */
 public class Slice {
 
