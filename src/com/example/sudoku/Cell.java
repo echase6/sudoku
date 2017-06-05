@@ -1,7 +1,21 @@
 package com.example.sudoku;
 
+import java.util.List;
+
 /**
  * Created by Eric on 12/14/2016.
+ *
+ *     RCB
+ *    +---+---+---+---+
+ *    |000|010|021|031|
+ *    +---+---+---+---+
+ *    |100|110|121|131|
+ *    +---+---+---+---+
+ *    |202|212|223|233|
+ *    +---+---+---+---+
+ *    |302|312|323|333|
+ *    +---+---+---+---+
+ *
  *
  *
  */
@@ -19,6 +33,15 @@ public class Cell {
         this.box = box;
         this.num = num;
         this.filled = filled;
+    }
+
+    public void set(Cell rhs)
+    {
+        this.row = rhs.row;
+        this.col = rhs.col;
+        this.box = rhs.box;
+        this.num = rhs.num;
+        this.filled = rhs.filled;
     }
 
     public void setFilled(boolean filled)
@@ -42,6 +65,14 @@ public class Cell {
         this.col = col;
         this.box = box;
         this.num = num;
+    }
+
+    public Cell(List<String> indices, List<Integer> values)
+    {
+        for (int i = 0; i < indices.size(); i++)
+        {
+
+        }
     }
 
     public boolean isFilled()

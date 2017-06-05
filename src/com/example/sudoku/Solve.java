@@ -18,7 +18,6 @@ public class Solve {
         board.loadBoard();
         board.display3dBoard();
         board.displayBoard();
-//        board.solveBoard();
 
         Solver solver = new Solver(board);
         solver.init();

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Eric on 11/17/2016.
@@ -17,7 +18,7 @@ public class Board {
         private Integer order;
         private Integer size;
         private List<List<List<Cell>>> cells;
-        private HashMap<Integer, String> charMap = new HashMap<>();
+        private Map<Integer, String> charMap = new HashMap<>();
         private final String order2map;
         private final String order3map;
         private final String order4map;
@@ -37,17 +38,17 @@ public class Board {
 
 
     public void makeBoard(Boolean addDummyData) {
+        CellFactory factory = new CellFactory(order);
         for (int i = 0; i < size; i++) {
             ArrayList<List<Cell>> cols = new ArrayList<>(size);
             for (int j = 0; j < size; j++) {
-                int box =  j / order + (i / order) * order;
                 ArrayList<Cell> nums = new ArrayList<>(size);
                 for (int k = 0; k < size; k++) {
                     Cell cell;
                     if (addDummyData) {
-                        cell = new Cell(i, j, k, box, true);
+                        cell = factory.getFilledCell(i, j, k);
                     } else {
-                        cell = new Cell(i, j, k, box, true);
+                        cell = factory.getFilledCell(i, j, k);
                     }
                     nums.add(cell);
                 }
@@ -57,22 +58,6 @@ public class Board {
         }
     }
 
-
-    public void makeEmptyBoard() {
-        for (int i = 0; i < size; i++) {
-            ArrayList<List<Cell>> cols = new ArrayList<>(size);
-            for (int j = 0; j < size; j++) {
-                int box =  j / order + (i / order) * order;
-                ArrayList<Cell> nums = new ArrayList<>(size);
-                for (int k = 0; k < size; k++) {
-                    Cell cell = new Cell(i, j, k, box, false);
-                    nums.add(cell);
-                }
-                cols.add(nums);
-            }
-            cells.add(cols);
-        }
-    }
 
     /**
      * displayBoard does the obvious.
@@ -172,12 +157,6 @@ public class Board {
 
     }
 
-    /**
-     * solveBoard is the entry point for the solver.
-     */
-    public void solveBoard() {
-        System.out.println("Solving board.");
-    }
 
     /**
      * Return the character for an individual shaft.  Possibilities are:
@@ -280,8 +259,61 @@ public class Board {
         return cells;
     }
 
-//    public Boolean[][][] getCells()
-//    {
-//        return cells;
-//    }
+
+    /**
+     * This makes 8 versions of the board, according the the solving order.
+     * (4D) For each version:
+     *    -- potentially make a copy here and spin off threads for the below
+     *    (3D -- board) For each (first) index:
+     *       (2D -- slice) For each (second) index:
+     *           For every 1 row:
+     *             if there is one filled cell in one row...
+     *           For every pairs of rows:
+     *             if there are two filled cells in two rows...
+     *           For every three rows:
+     *             if there are three filled cells in three rows...
+     *           ...remove from all other rows
+     *   -- aggregate the results for each of the 8 boards here ---
+     *
+     * @return 8 versions of the board
+     */
+    public List<List<List<List<Cell>>>> transpose()
+    {
+        List<List<List<List<Cell>>>> permutations = new ArrayList<>(8);
+        for (int h = 0; h < 8; h++) {
+            List<List<List<Cell>>> outer = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                List<List<Cell>> mid = new ArrayList<>(size);
+                for (int j = 0; j < size; j++) {
+                    mid.add(new ArrayList<>(size));
+                }
+                outer.add(mid);
+            }
+            permutations.add(outer);
+        }
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                for (int k = 0; k < size; k++) {
+                    Cell thisOne = cells.get(i).get(j).get(k);
+                    permutations.get(0).get(i).get(j).add(thisOne);
+                    permutations.get(1).get(j).get(i).add(thisOne);
+
+                    thisOne = cells.get(i).get(k).get(j);
+                    permutations.get(2).get(i).get(j).add(thisOne);
+                    permutations.get(3).get(j).get(i).add(thisOne);
+
+                    thisOne = cells.get(k).get(i).get(j);
+                    permutations.get(4).get(i).get(j).add(thisOne);
+                    permutations.get(5).get(j).get(i).add(thisOne);
+
+                    int box =  i / order + (j / order) * order;
+                    thisOne = cells.get(i).get(j).get(k);
+                    permutations.get(6).get(box).get(k).add(thisOne);
+                    permutations.get(7).get(k).get(box).add(thisOne);
+                }
+            }
+        }
+        return permutations;
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.sudoku;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -18,7 +19,12 @@ public class Solver {
     }
 
     public void init() {
-        slices = new ArrayList<>(board.getSize());}
+        slices = new ArrayList<>(board.getSize());
+
+
+
+        // Need to get the slices here
+    }
 
     public void run() {
         Board results;
@@ -38,7 +44,19 @@ public class Solver {
     }
 
     private Slice getSliceResults(Slice slice) {
-        return slice;
+
+        CellFactory factory = new CellFactory(board.getOrder());
+
+        Cell cell0 = factory.getEmptyCell(0, 0, 0);
+        Cell cell1 = factory.getEmptyCell(1, 0, 0);
+        Cell cell2 = factory.getEmptyCell(2, 0, 0);
+        Cell cell3 = factory.getEmptyCell(3, 0, 0);
+
+        List<Cell> row0 = Arrays.asList(cell0, cell1);
+        List<Cell> row1 = Arrays.asList(cell2, cell3);
+        List<List<Cell>> sliceList = Arrays.asList(row0, row1);
+
+        return new Slice(sliceList, 1);
     }
 
     private Board aggregateResults(List<Slice> sliceResults) {
@@ -63,6 +81,8 @@ public class Solver {
     }
 
     private void depopulateBoard(Board board, Board results) {
+        // Un-fill all cells that are filled in the results
+
         int size = board.getSize();
         List<List<List<Cell>>> boardCells = board.getCells();
         List<List<List<Cell>>> resultsCells = results.getCells();
