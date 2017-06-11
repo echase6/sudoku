@@ -28,12 +28,12 @@ public class CellFactory {
     public Cell getFilledCell(int row, int col, int num)
     {
         int box =  col / order + (row / order) * order;
-        return new Cell(row, col, num, box, true);
+        return new Cell(row, col, box, num, true);
     }
 
     public Cell getEmptyCell(int row, int col, int num)
     {
         int box =  col / order + (row / order) * order;
-        return new Cell(row, col, num, box, false);
+        return new Cell(row, col, box, num, false);
     }
 }

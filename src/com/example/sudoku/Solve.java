@@ -1,8 +1,6 @@
 package com.example.sudoku;
 
 
-import java.util.HashMap;
-
 /**
  * Created by Eric on 11/16/2016.
  *

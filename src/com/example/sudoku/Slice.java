@@ -20,8 +20,8 @@ import java.util.List;
  *      4  C N R
  *      5  N R C
  *      6  N C R
- *      7  B N Index
- *      8  N B Index
+ *      7  B N I (index)
+ *      8  B I N
  */
 public class Slice {
 

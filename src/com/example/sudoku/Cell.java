@@ -19,7 +19,7 @@ import java.util.List;
  *
  *
  */
-public class Cell {
+public class Cell extends Object{
     private int row;
     private int col;
     private int box;
@@ -42,6 +42,11 @@ public class Cell {
         this.box = rhs.box;
         this.num = rhs.num;
         this.filled = rhs.filled;
+    }
+
+    public int getBox()
+    {
+        return box;
     }
 
     public void setFilled(boolean filled)

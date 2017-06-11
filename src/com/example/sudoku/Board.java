@@ -120,7 +120,7 @@ public class Board {
 
     public void loadBoard() {
         String directory = "puzzles/order_" + order;
-        String filename = "sudoku_1.txt";
+        String filename = "sudoku_2.txt";
         String fullFileName = directory + '/' + filename;
         System.out.println(directory + "/" + filename);
 
@@ -187,7 +187,7 @@ public class Board {
      * @param shaft is a 1-dimensional array
      * @return character
      */
-    private Integer countShaftChoices(List<Cell> shaft) {
+    private static Integer countShaftChoices(List<Cell> shaft) {
         Integer count = 0;
         for (int i = 0; i < shaft.size(); i++) {
             if (shaft.get(i).isFilled()) {
@@ -203,7 +203,7 @@ public class Board {
      * @param qty   the quantity to test to.
      * @return
      */
-    private Integer countFilledCellsToQty(Integer qty) {
+    private static Integer countFilledCellsToQty(List<List<List<Cell>>> cells, int size, int qty) {
         Integer count = 0;
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
@@ -220,15 +220,15 @@ public class Board {
      *
      * @return
      */
-    public Integer countFilledCells() {
-        return countFilledCellsToQty(1);
+    public static Integer countFilledCells(List<List<List<Cell>>> cells, int size) {
+        return countFilledCellsToQty(cells, size, 1);
     }
 
     /**
      * Returns the number of cells with a true in them.
      * @return
      */
-    public Integer sumFilledCells()
+    public static Integer sumFilledCells(List<List<List<Cell>>> cells, int size)
     {
         Integer count = 0;
         for (int i = 0; i < size; i++) {
@@ -280,10 +280,13 @@ public class Board {
     public List<List<List<List<Cell>>>> transpose()
     {
         List<List<List<List<Cell>>>> permutations = new ArrayList<>(8);
+
         for (int h = 0; h < 8; h++) {
             List<List<List<Cell>>> outer = new ArrayList<>(size);
+
             for (int i = 0; i < size; i++) {
                 List<List<Cell>> mid = new ArrayList<>(size);
+
                 for (int j = 0; j < size; j++) {
                     mid.add(new ArrayList<>(size));
                 }
@@ -307,12 +310,28 @@ public class Board {
                     permutations.get(4).get(i).get(j).add(thisOne);
                     permutations.get(5).get(j).get(i).add(thisOne);
 
-                    int box =  i / order + (j / order) * order;
+                    int box =  j / order + (i / order) * order;
+                    int iter = j % order + (i % order) * order;
                     thisOne = cells.get(i).get(j).get(k);
-                    permutations.get(6).get(box).get(k).add(thisOne);
-                    permutations.get(7).get(k).get(box).add(thisOne);
+                    permutations.get(6).get(box).get(iter).add(thisOne);  // B I N
+
+//                    System.out.println("This one  row: " + i + " col: " + j + " num: " + k + " box: " + thisOne.getBox());
+//                    System.out.println("                Going to i: " + box + " j: " + k);
+//                    System.out.println(" ");
+
+                    box =  i / order + (k / order) * order;
+                    iter = i % order + (k % order) * order;
+                    thisOne = cells.get(k).get(i).get(j);
+                    permutations.get(7).get(box).get(iter).add(thisOne);  // NEED B N I
+
+
+//                    System.out.println("This One: " + thisOne);
+
+//                    System.out.println("  Going to index1: " + k + " index2: " + box);
                 }
+//                System.out.println("  ");
             }
+//            System.out.println("  ");
         }
         return permutations;
     }
