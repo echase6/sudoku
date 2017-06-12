@@ -14,30 +14,33 @@ import java.util.Map;
  * <p>
  * Board related functions.
  */
-public class Board {
-        private Integer order;
-        private Integer size;
-        private List<List<List<Cell>>> cells;
-        private Map<Integer, String> charMap = new HashMap<>();
-        private final String order2map;
-        private final String order3map;
-        private final String order4map;
+class Board {
+    private Integer order;
+    private Integer size;
+    private List<List<List<Cell>>> cells;
+    private String filename;
+    private String directory;
+
+    private static final String ORDER_2_MAP = "1234";
+    private static final String ORDER_3_MAP = "123456789";
+    private static final String ORDER_4_MAP = "0123456789ABCDEF";
+    private Map<Integer, String> charMap = new HashMap<>();
 
 
-    public Board(Integer order) {
+    Board(Integer order, String filename) {
         this.order = order;
-        order2map = "1234";
-        order3map = "123456789";
-        order4map = "0123456789ABCDEF";
-        charMap.put(2, order2map);
-        charMap.put(3, order3map);
-        charMap.put(4, order4map);
-        this.size = order * order;
-        this.cells = new ArrayList<>(size);
+        this.filename = filename;
+
+        charMap.put(2, ORDER_2_MAP);
+        charMap.put(3, ORDER_3_MAP);
+        charMap.put(4, ORDER_4_MAP);
+        size = order * order;
+        directory = "C:/Users/Eric/IdeaProjects/sudoku/puzzles/order_" + order;
+        cells = new ArrayList<>(size);
     }
 
 
-    public void makeBoard(Boolean addDummyData) {
+    void makeBoard(Boolean addDummyData) {
         CellFactory factory = new CellFactory(order);
         for (int i = 0; i < size; i++) {
             ArrayList<List<Cell>> cols = new ArrayList<>(size);
@@ -62,7 +65,9 @@ public class Board {
     /**
      * displayBoard does the obvious.
      */
-    public void displayBoard() {
+    void displayBoard() {
+
+        System.out.println("\033[0;0H"); // Move cursor to top of screen
         StringBuilder border = new StringBuilder("+");
         for (int i = 0; i < order; i++) {
             for (int j = 0; j < order; j++) {
@@ -86,7 +91,7 @@ public class Board {
         }
     }
 
-    public void display3dBoard() {
+    void display3dBoard() {
         StringBuilder border = new StringBuilder("");
         for (int i = 0; i < size; i++) {
             border.append("+-");
@@ -118,12 +123,8 @@ public class Board {
         System.out.println(border);
     }
 
-    public void loadBoard() {
-        String directory = "puzzles/order_" + order;
-        String filename = "sudoku_2.txt";
+    void loadBoard() {
         String fullFileName = directory + '/' + filename;
-        System.out.println(directory + "/" + filename);
-
         FileReader fReader;
         try {
             fReader = new FileReader(fullFileName);
@@ -174,7 +175,7 @@ public class Board {
                 if (value != 'X') {
                     return '.';
                 } else {
-                    value = Integer.toString(i + 1).charAt(0);
+                    value = charMap.get(order).charAt(i);
                 }
             }
         }
@@ -189,8 +190,8 @@ public class Board {
      */
     private static Integer countShaftChoices(List<Cell> shaft) {
         Integer count = 0;
-        for (int i = 0; i < shaft.size(); i++) {
-            if (shaft.get(i).isFilled()) {
+        for (Cell aShaft : shaft) {
+            if (aShaft.isFilled()) {
                 count++;
             }
         }
@@ -201,7 +202,8 @@ public class Board {
      * Return the number of cells that are filled to particular quantity.
      *
      * @param qty   the quantity to test to.
-     * @return
+     *
+     * @return the count of the number of shafts that are filled to the quantity
      */
     private static Integer countFilledCellsToQty(List<List<List<Cell>>> cells, int size, int qty) {
         Integer count = 0;
@@ -218,17 +220,17 @@ public class Board {
     /**
      * Return the number of cells that have only one cell filled.
      *
-     * @return
+     * @return the number of cells that are filled
      */
-    public static Integer countFilledCells(List<List<List<Cell>>> cells, int size) {
+    static Integer countFilledCells(List<List<List<Cell>>> cells, int size) {
         return countFilledCellsToQty(cells, size, 1);
     }
 
     /**
      * Returns the number of cells with a true in them.
-     * @return
+     *
      */
-    public static Integer sumFilledCells(List<List<List<Cell>>> cells, int size)
+    static Integer sumFilledCells(List<List<List<Cell>>> cells, int size)
     {
         Integer count = 0;
         for (int i = 0; i < size; i++) {
@@ -244,17 +246,13 @@ public class Board {
         return count;
     }
 
-    public Integer getSize()
+    Integer getSize()
     {
         return size;
     }
 
-    public Integer getOrder()
-    {
-        return order;
-    }
 
-    public List<List<List<Cell>>> getCells()
+    List<List<List<Cell>>> getCells()
     {
         return cells;
     }
@@ -262,22 +260,20 @@ public class Board {
 
     /**
      * This makes 8 versions of the board, according the the solving order.
+     * This is a heavy-lifting method, very crucial for the overall operation
+     *
      * (4D) For each version:
-     *    -- potentially make a copy here and spin off threads for the below
      *    (3D -- board) For each (first) index:
      *       (2D -- slice) For each (second) index:
-     *           For every 1 row:
-     *             if there is one filled cell in one row...
-     *           For every pairs of rows:
-     *             if there are two filled cells in two rows...
-     *           For every three rows:
-     *             if there are three filled cells in three rows...
-     *           ...remove from all other rows
-     *   -- aggregate the results for each of the 8 boards here ---
+     *           (1D -- shaft)  For each (third) index:
+     *           Get a cell from the board and add it to the shaft
+     *             Iterate on the cell and the shaft to make all 3 sides, taken both ways (3*2 = 6 total)
+     *           Get a cell from the board and add it to a box-shaft
+     *             Iterate on the cell and box-shaft to make B-N-I and B-I-N views
      *
      * @return 8 versions of the board
      */
-    public List<List<List<List<Cell>>>> transpose()
+    List<List<List<List<Cell>>>> transpose()
     {
         List<List<List<List<Cell>>>> permutations = new ArrayList<>(8);
 
@@ -313,26 +309,16 @@ public class Board {
                     int box =  j / order + (i / order) * order;
                     int iter = j % order + (i % order) * order;
                     thisOne = cells.get(i).get(j).get(k);
-                    permutations.get(6).get(box).get(iter).add(thisOne);  // B I N
-
-//                    System.out.println("This one  row: " + i + " col: " + j + " num: " + k + " box: " + thisOne.getBox());
-//                    System.out.println("                Going to i: " + box + " j: " + k);
-//                    System.out.println(" ");
+                    permutations.get(6).get(box).get(iter).add(thisOne);
 
                     box =  i / order + (k / order) * order;
                     iter = i % order + (k % order) * order;
                     thisOne = cells.get(k).get(i).get(j);
-                    permutations.get(7).get(box).get(iter).add(thisOne);  // NEED B N I
-
-
-//                    System.out.println("This One: " + thisOne);
-
-//                    System.out.println("  Going to index1: " + k + " index2: " + box);
+                    permutations.get(7).get(box).get(iter).add(thisOne);
                 }
-//                System.out.println("  ");
             }
-//            System.out.println("  ");
         }
+
         return permutations;
     }
 }

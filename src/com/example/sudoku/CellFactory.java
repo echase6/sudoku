@@ -17,21 +17,21 @@ package com.example.sudoku;
  *
  *
  */
-public class CellFactory {
+class CellFactory {
     private int order;
 
-    public CellFactory(int order)
+    CellFactory(int order)
     {
         this.order = order;
     }
 
-    public Cell getFilledCell(int row, int col, int num)
+    Cell getFilledCell(int row, int col, int num)
     {
         int box =  col / order + (row / order) * order;
         return new Cell(row, col, box, num, true);
     }
 
-    public Cell getEmptyCell(int row, int col, int num)
+    Cell getEmptyCell(int row, int col, int num)
     {
         int box =  col / order + (row / order) * order;
         return new Cell(row, col, box, num, false);

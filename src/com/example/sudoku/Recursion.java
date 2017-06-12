@@ -8,7 +8,15 @@ import java.util.List;
 /**
  * Created by Eric on 6/4/2017.
  *
- * This is a somewhat academic exercise in recrusion, to generate permutations and combinations of an inputted list.
+ * This is an exercise in recursion, to generate permutations and combinations of an inputted list.
+ *
+ * The makeCombo is here as an (unused) freebee.
+ *
+ * The makePerm is used for the Sudoku solver in grabbing combinations of rows for processing
+ * Since the rows to be modified are exclusive of the rows to be inspected, a getPermPairs() wrapper
+ *   is added to return the combinations and the rows excluded from the combinations.
+ *
+ * This is the other heavy-lifting algorithm in the Sudoku solver.
  */
 public class Recursion {
     public static void main(String[] args) {

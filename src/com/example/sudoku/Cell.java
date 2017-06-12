@@ -19,14 +19,14 @@ import java.util.List;
  *
  *
  */
-public class Cell extends Object{
+class Cell {
     private int row;
     private int col;
     private int box;
     private int num;
     private boolean filled;
 
-    public Cell(int row, int col, int box, int num, boolean filled)
+    Cell(int row, int col, int box, int num, boolean filled)
     {
         this.row = row;
         this.col = col;
@@ -35,52 +35,14 @@ public class Cell extends Object{
         this.filled = filled;
     }
 
-    public void set(Cell rhs)
-    {
-        this.row = rhs.row;
-        this.col = rhs.col;
-        this.box = rhs.box;
-        this.num = rhs.num;
-        this.filled = rhs.filled;
-    }
 
-    public int getBox()
-    {
-        return box;
-    }
-
-    public void setFilled(boolean filled)
-    {
-        this.filled = filled;
-    }
-
-    public void fill()
-    {
-        this.filled = true;
-    }
-
-    public void unfill()
+    void unfill()
     {
         this.filled = false;
     }
 
-    public void setLocation(int row, int col, int box, int num)
-    {
-        this.row = row;
-        this.col = col;
-        this.box = box;
-        this.num = num;
-    }
 
-    public Cell(List<String> indices, List<Integer> values)
-    {
-        for (int i = 0; i < indices.size(); i++)
-        {
-
-        }
-    }
-
-    public boolean isFilled()
+    boolean isFilled()
     {
         return filled;
     }
