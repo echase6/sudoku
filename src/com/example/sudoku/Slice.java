@@ -1,7 +1,6 @@
 package com.example.sudoku;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -23,47 +22,60 @@ import java.util.List;
  *      7  B N I (index)
  *      8  B I N
  */
-public class Slice {
+class Slice {
 
-    private List<List<Cell>> cells;
-    private Integer sliceNum;
+    private List<Shaft> shafts;
 
-    public Slice(List<List<Cell>> cells, int sliceNum) {
-        this.cells = cells;
-        this.sliceNum = sliceNum;
+    Slice(int size) {
+        this.shafts = new ArrayList<>(size);
     }
 
-    public List<List<Cell>> getCells()
+    Slice(List<Shaft> shafts) {
+        this.shafts = new ArrayList<>(shafts);
+    }
+
+    Slice(Slice rhs) {
+        this.shafts = new ArrayList<>(rhs.getShafts());  // <-- It turns out that this is very important in making a copy
+    }
+
+    List<Shaft> getShafts() {
+        return shafts;
+    }
+
+    Shaft getShaft(int i) {
+        return shafts.get(i);
+    }
+
+    void addShaft(Shaft shaft)
     {
-        return cells;
+        if (shafts == null)
+        {
+            shafts = new ArrayList<>();
+        }
+        this.shafts.add(shaft);
     }
 
-    public Integer getSliceNum() {
-        return sliceNum;
-    }
-
-    public List<List<Integer>> getIndices()
+    void addShaft(int i, Shaft shaft)
     {
-        List<List<Integer>> indices = null;
-        indices.add(Arrays.asList(0, 0, 0));
-        indices.add(Arrays.asList(0, 1, 0));
-        indices.add(Arrays.asList(0, 2, 0));
-        indices.add(Arrays.asList(0, 3, 0));
-        indices.add(Arrays.asList(1, 0, 0));
-        indices.add(Arrays.asList(1, 1, 0));
-        indices.add(Arrays.asList(1, 2, 0));
-        indices.add(Arrays.asList(1, 3, 0));
-        indices.add(Arrays.asList(2, 0, 0));
-        indices.add(Arrays.asList(2, 1, 0));
-        indices.add(Arrays.asList(2, 2, 0));
-        indices.add(Arrays.asList(2, 3, 0));
-        indices.add(Arrays.asList(3, 0, 0));
-        indices.add(Arrays.asList(3, 1, 0));
-        indices.add(Arrays.asList(3, 2, 0));
-        indices.add(Arrays.asList(3, 3, 0));
-
-        return indices;
+        if (shafts == null)
+        {
+            shafts = new ArrayList<>();
+        }
+        this.shafts.add(i, shaft);
     }
 
+    void removeAllShafts(List<Shaft> shafts)
+    {
+        this.shafts.removeAll(shafts);
+    }
 
+    int getSize()
+    {
+        return shafts.size();
+    }
+
+    Slice subList(int start, int stop)
+    {
+        return new Slice(getShafts().subList(start, stop));
+    }
 }

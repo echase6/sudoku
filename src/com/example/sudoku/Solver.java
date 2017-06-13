@@ -22,23 +22,23 @@ class Solver {
 
 
     void run() {
-        int filled = Board.sumFilledCells(board.getCells(), board.getSize());
+        int filled = board.getCube().sumFilledCells();
 
         int counter = 0;
         int newFilled = filled;
         Boolean done;
 
-        List<List<List<List<Cell>>>> slicedBoard = board.transpose();
+        List<Cube> slicedBoard = board.transpose();
 
         do {
             filled = newFilled;
 
-            for (List<List<List<Cell>>> boardIter: slicedBoard)
+            for (Cube boardIter: slicedBoard)
             {
-                for (List<List<Cell>> slice: boardIter)
+                for (Slice slice: boardIter.getSlices())
                 {
                     processSlice(slice);
-                    newFilled = Board.sumFilledCells(board.getCells(), board.getSize());
+                    newFilled = board.getCube().sumFilledCells();
                     counter++;
                     board.displayBoard();
                     System.out.println("Filled = " + newFilled + " Counter = " + counter + "\033[K");
@@ -67,11 +67,11 @@ class Solver {
      *             if there are three filled cells in three rows...
      *           ...remove from all other rows
      */
-    private void processSlice (List<List<Cell>> trialSlice)
+    private void processSlice (Slice trialSlice)
     {
         for (int i = 1; i <= iter; i++) {
-            List<Pair<List<List<Cell>>, List<List<Cell>>>> trialPerms  = Recursion.getPermPairs(trialSlice, i);
-            for (Pair<List<List<Cell>>, List<List<Cell>>> trial: trialPerms) {
+            List<Pair<Slice, Slice>> trialPerms  = Permute.getPermPairs(trialSlice, i);
+            for (Pair<Slice, Slice> trial: trialPerms) {
                 List<Boolean> collapsed = collapseSlice(trial.getKey());
                 if (countFilled(collapsed) == i)
                 {
@@ -82,15 +82,15 @@ class Solver {
     }
 
 
-    private List<Boolean> collapseSlice(List<List<Cell>> slice)
+    private List<Boolean> collapseSlice(Slice slice)
     {
         List<Boolean> result = new ArrayList<>();
-        for (int i = 0; i < slice.get(0).size(); i++)
+        for (int i = 0; i < slice.getShaft(0).getSize(); i++)
         {
             result.add(false);
-            for (List<Cell> shaft: slice)
+            for (Shaft shaft: slice.getShafts())
             {
-                if (shaft.get(i).isFilled())
+                if (shaft.getCell(i).isFilled())
                 {
                     result.set(i, true);
                 }
@@ -115,15 +115,15 @@ class Solver {
     }
 
 
-    private void updateSlice(List<List<Cell>> slice, List<Boolean> collapsed)
+    private void updateSlice(Slice slice, List<Boolean> collapsed)
     {
         for (int i = 0; i < collapsed.size(); i++)
         {
-            for (List<Cell> shaft: slice)
+            for (Shaft shaft: slice.getShafts())
             {
                 if (collapsed.get(i))
                 {
-                    shaft.get(i).unfill();  // <-- Here is where progress is made.
+                    shaft.getCell(i).unfill();  // <-- Here is where progress is made.
                 }
             }
         }
@@ -132,7 +132,7 @@ class Solver {
 
     private boolean isDone(Board board) {
         int targetQuantity = board.getSize() * board.getSize();
-        int filledQuantity = Board.countFilledCells(board.getCells(), board.getSize());
+        int filledQuantity = board.getCube().countFilledCells();
         return (targetQuantity == filledQuantity);
     }
 }

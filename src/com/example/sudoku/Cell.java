@@ -1,7 +1,5 @@
 package com.example.sudoku;
 
-import java.util.List;
-
 /**
  * Created by Eric on 12/14/2016.
  *
