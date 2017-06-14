@@ -19,6 +19,7 @@ import java.util.List;
  * This is the other heavy-lifting algorithm in the Sudoku solver.
  */
 public class Recursion {
+
     public static void main(String[] args) {
 
         List<List<String>> mid = new ArrayList<>();

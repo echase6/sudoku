@@ -17,7 +17,7 @@ import java.util.Map;
 class Board {
     private Integer order;
     private Integer size;
-    private List<List<List<Cell>>> cells;
+    private Cube cube;
     private String filename;
     private String directory;
 
@@ -36,16 +36,19 @@ class Board {
         charMap.put(4, ORDER_4_MAP);
         size = order * order;
         directory = "C:/Users/Eric/IdeaProjects/sudoku/puzzles/order_" + order;
-        cells = new ArrayList<>(size);
+        cube = new Cube(size);
+
     }
 
 
     void makeBoard(Boolean addDummyData) {
         CellFactory factory = new CellFactory(order);
         for (int i = 0; i < size; i++) {
-            ArrayList<List<Cell>> cols = new ArrayList<>(size);
+            Slice face = new Slice(size);
+
             for (int j = 0; j < size; j++) {
-                ArrayList<Cell> nums = new ArrayList<>(size);
+                Shaft nums = new Shaft(size);
+
                 for (int k = 0; k < size; k++) {
                     Cell cell;
                     if (addDummyData) {
@@ -53,11 +56,11 @@ class Board {
                     } else {
                         cell = factory.getFilledCell(i, j, k);
                     }
-                    nums.add(cell);
+                    nums.addCell(cell);
                 }
-                cols.add(nums);
+                face.addShaft(nums);
             }
-            cells.add(cols);
+            cube.addSlice(face);
         }
     }
 
@@ -81,7 +84,7 @@ class Board {
                 StringBuilder line = new StringBuilder("|");
                 for (int k = 0; k < order; k++) {
                     for (int l = 0; l < order; l++) {
-                        line.append(' ').append(getChar(cells.get(i * order + j).get(k * order + l))).append(' ');
+                        line.append(' ').append(getChar(cube.getSlice(i * order + j).getShaft(k * order + l))).append(' ');
                     }
                     line.append('|');
                 }
@@ -109,7 +112,7 @@ class Board {
                 line.append("| ");
                 // k is the column, within each square
                 for (int k = 0; k < size; k++) {
-                    if (cells.get(i).get(k).get(j).isFilled()) {  // Don't let this freak you out...
+                    if (cube.getSlice(i).getShaft(k).getCell(j).isFilled()) {  // Don't let this freak you out...
                         line.append(charMap.get(order).charAt(j));
                     } else {
                         line.append('.');
@@ -144,7 +147,7 @@ class Board {
                         Integer index = letterSet.indexOf(line.substring(j, j+1));
                         for (int k = 0; k < size; k++) {
                             if (k != index) {
-                                cells.get(i).get(j).get(k).unfill();
+                                cube.getSlice(i).getShaft(j).getCell(k).unfill();
                             }
                         }
                     }
@@ -163,15 +166,15 @@ class Board {
      * Return the character for an individual shaft.  Possibilities are:
      * -- a number, as long as there is one unique cell filled
      * -- a period, as long as there are more than one cell filled
-     * -- an X, meaning that no cells are filled, which is an error state
+     * -- an X, meaning that no cube are filled, which is an error state
      *
      * @param shaft is a 1-dimensional array
      * @return character
      */
-    private Character getChar(List<Cell> shaft) {
+    private Character getChar(Shaft shaft) {
         Character value = 'X';
-        for (int i = 0; i < shaft.size(); i++) {
-            if (shaft.get(i).isFilled()) {
+        for (int i = 0; i < shaft.getSize(); i++) {
+            if (shaft.getCell(i).isFilled()) {
                 if (value != 'X') {
                     return '.';
                 } else {
@@ -182,69 +185,6 @@ class Board {
         return value;
     }
 
-    /**
-     * Return the number of filled (true) cells in a shaft.
-     *
-     * @param shaft is a 1-dimensional array
-     * @return character
-     */
-    private static Integer countShaftChoices(List<Cell> shaft) {
-        Integer count = 0;
-        for (Cell aShaft : shaft) {
-            if (aShaft.isFilled()) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    /**
-     * Return the number of cells that are filled to particular quantity.
-     *
-     * @param qty   the quantity to test to.
-     *
-     * @return the count of the number of shafts that are filled to the quantity
-     */
-    private static Integer countFilledCellsToQty(List<List<List<Cell>>> cells, int size, int qty) {
-        Integer count = 0;
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                if (countShaftChoices(cells.get(i).get(j)).equals(qty)) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-
-    /**
-     * Return the number of cells that have only one cell filled.
-     *
-     * @return the number of cells that are filled
-     */
-    static Integer countFilledCells(List<List<List<Cell>>> cells, int size) {
-        return countFilledCellsToQty(cells, size, 1);
-    }
-
-    /**
-     * Returns the number of cells with a true in them.
-     *
-     */
-    static Integer sumFilledCells(List<List<List<Cell>>> cells, int size)
-    {
-        Integer count = 0;
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                for (int k = 0; k < size; k++) {
-                    if (cells.get(i).get(j).get(k).isFilled())
-                    {
-                        count++;
-                    }
-                }
-            }
-        }
-        return count;
-    }
 
     Integer getSize()
     {
@@ -252,9 +192,9 @@ class Board {
     }
 
 
-    List<List<List<Cell>>> getCells()
+    Cube getCube()
     {
-        return cells;
+        return cube;
     }
 
 
@@ -273,20 +213,18 @@ class Board {
      *
      * @return 8 versions of the board
      */
-    List<List<List<List<Cell>>>> transpose()
+    List<Cube> transpose()
     {
-        List<List<List<List<Cell>>>> permutations = new ArrayList<>(8);
+        List<Cube> permutations = new ArrayList<>(8);
 
         for (int h = 0; h < 8; h++) {
-            List<List<List<Cell>>> outer = new ArrayList<>(size);
-
+            Cube outer = new Cube(size);
             for (int i = 0; i < size; i++) {
-                List<List<Cell>> mid = new ArrayList<>(size);
-
+                Slice mid = new Slice(size);
                 for (int j = 0; j < size; j++) {
-                    mid.add(new ArrayList<>(size));
+                    mid.addShaft(new Shaft(size));
                 }
-                outer.add(mid);
+                outer.addSlice(mid);
             }
             permutations.add(outer);
         }
@@ -294,27 +232,27 @@ class Board {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 for (int k = 0; k < size; k++) {
-                    Cell thisOne = cells.get(i).get(j).get(k);
-                    permutations.get(0).get(i).get(j).add(thisOne);
-                    permutations.get(1).get(j).get(i).add(thisOne);
+                    Cell thisOne = cube.getSlice(i).getShaft(j).getCell(k);
+                    permutations.get(0).getSlice(i).getShaft(j).addCell(thisOne);
+                    permutations.get(1).getSlice(j).getShaft(i).addCell(thisOne);
 
-                    thisOne = cells.get(i).get(k).get(j);
-                    permutations.get(2).get(i).get(j).add(thisOne);
-                    permutations.get(3).get(j).get(i).add(thisOne);
+                    thisOne = cube.getSlice(i).getShaft(k).getCell(j);
+                    permutations.get(2).getSlice(i).getShaft(j).addCell(thisOne);
+                    permutations.get(3).getSlice(j).getShaft(i).addCell(thisOne);
 
-                    thisOne = cells.get(k).get(i).get(j);
-                    permutations.get(4).get(i).get(j).add(thisOne);
-                    permutations.get(5).get(j).get(i).add(thisOne);
+                    thisOne = cube.getSlice(k).getShaft(i).getCell(j);
+                    permutations.get(4).getSlice(i).getShaft(j).addCell(thisOne);
+                    permutations.get(5).getSlice(j).getShaft(i).addCell(thisOne);
 
                     int box =  j / order + (i / order) * order;
                     int iter = j % order + (i % order) * order;
-                    thisOne = cells.get(i).get(j).get(k);
-                    permutations.get(6).get(box).get(iter).add(thisOne);
+                    thisOne = cube.getSlice(i).getShaft(j).getCell(k);
+                    permutations.get(6).getSlice(box).getShaft(iter).addCell(thisOne);
 
                     box =  i / order + (k / order) * order;
                     iter = i % order + (k % order) * order;
-                    thisOne = cells.get(k).get(i).get(j);
-                    permutations.get(7).get(box).get(iter).add(thisOne);
+                    thisOne = cube.getSlice(k).getShaft(i).getCell(j);
+                    permutations.get(7).getSlice(box).getShaft(iter).addCell(thisOne);
                 }
             }
         }
